@@ -1,0 +1,153 @@
+---
+title: "Homework R in Practice"
+author: "Calvin Sibarani, edited by Yurham Afif"
+date: "5/17/2021"
+output: github_document
+---
+
+```{r}
+# Install the package if you haven't!
+# install.packages('naniar')
+library(naniar)
+library(tidyverse)
+```
+
+```{r}
+riskfactors
+```
+# PACKAGE VISUALISASI
+```{r}
+#install.packages("visdat")
+library(visdat)
+```
+
+
+# PERTANYAAN
+Visualize the missing data in riskfactors dataset, with package that we've learned before
+Apa yang bisa kita simpulkan dari missing value di data ini? Ide apa yang bisa teman-teman sampaikan untuk mendiagnosa kenapa missing value ini bisa terjadi?
+
+```{r}
+# how much is the missing data?
+sum(is.na(riskfactors))
+# wow
+
+# Summarize missingness in each variable of the `riskfactors` dataset
+miss_var_summary(riskfactors)
+
+# Summarize missingness in each case of the `riskfactors` dataset
+miss_case_summary(riskfactors)
+
+# visualise missing values
+riskfactors %>% 
+  vis_miss()
+```
+```{r}
+# try to sort the data by 'age'
+# visualise missing values
+riskfactors %>% 
+  arrange(age) %>% 
+  vis_miss()
+```
+the higher age value, the more missing 'pregnant' data 
+
+```{r}
+# try to sort the data by 'income'
+# visualise missing values
+riskfactors %>% 
+  arrange(income) %>% 
+  vis_miss()
+```
+I cant interpret it visually haha
+
+```{r}
+# Return the summary of missingness in each variable, 
+# grouped by sex, in the `riskfactors` dataset
+riskfactors %>% 
+  group_by(sex) %>% 
+  miss_var_summary()
+
+# Return the summary of missingness in each case, 
+# grouped by sex, in the `riskfactors` dataset
+riskfactors %>% 
+  group_by(sex) %>% 
+  miss_case_summary()
+```
+pregnant data for male are all NA
+
+# Tabulating missingness
+```{r}
+# Tabulate missingness in each variable and case of the `riskfactors` dataset
+miss_var_table(riskfactors)
+miss_case_table(riskfactors)
+
+# Tabulate the missingness in each variable, grouped by sex, in the `riskfactors` dataset
+riskfactors %>% group_by(sex) %>% miss_var_table()
+
+# Tabulate of missingness in each case, grouped by sex, in the `riskfactors` dataset
+riskfactors %>% group_by(sex) %>% miss_case_table()
+```
+
+```{r}
+# Calculate the summaries for each run of missingness for the variable, health_poor
+miss_var_run(riskfactors, var = health_poor)
+
+# Calculate the summaries for each span of missingness, 
+# for a span of 4000, for the variable health_poor
+miss_var_span(riskfactors, var = health_poor, span_every = 50)
+
+# For each `sex` variable, calculate the run of missingness for health_poor
+riskfactors %>% 
+  group_by(sex) %>% 
+  miss_var_run(var = health_poor)
+
+# For each `month` variable, calculate the span of missingness 
+# of a span of 2000, for the variable health_poor
+riskfactors %>% 
+  group_by(sex) %>% 
+  miss_var_span(var = health_poor, span_every = 50)
+```
+more than half male data for 'health_poor' are incomplete, 
+```{r}
+# Explore the strange missing values "N/A"
+miss_scan_count(data = riskfactors, search = list("N/A"))
+
+# Explore the strange missing values "missing"
+miss_scan_count(data = riskfactors, search = list("missing"))
+
+# Explore the strange missing values "na"
+miss_scan_count(data = riskfactors, search = list("na"))
+
+# Explore the strange missing values " " (a single space)
+miss_scan_count(data = riskfactors, search = list(" "))
+
+# Explore all of the strange missing values, "N/A", "missing", "na", " "
+miss_scan_count(data = riskfactors, search = list("N/A", "missing","na", " "))
+```
+missing values are in a blank data WITHOUT ANY REDUNDANT DATA
+
+
+```{r}
+# investigate weight column
+riskfactors %>% 
+  mutate(miss_weight = is.na(weight_lbs)) %>% 
+  group_by(miss_weight) %>% 
+  summarise_all(mean, na.rm=TRUE)
+```
+missing "weight_lbs" impacts on missing "bmi" data (missing at random)
+
+```{r}
+# investigate weight column
+riskfactors %>% 
+  mutate(miss_pregnant = is.na(pregnant)) %>% 
+  group_by(miss_pregnant) %>% 
+  summarise_all(mean, na.rm=TRUE)
+```
+pregnant data is independent from other variable
+```{r}
+# investigate weight column
+riskfactors %>% 
+  mutate(miss_healthpoor = is.na(health_poor)) %>% 
+  group_by(miss_healthpoor) %>% 
+  summarise_all(mean, na.rm=TRUE)
+```
+missing 'health_poor' data impacts on 'health_physical' and 'health_mental' data with mean equals zero

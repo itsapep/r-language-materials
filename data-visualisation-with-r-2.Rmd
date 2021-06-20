@@ -1,0 +1,82 @@
+---
+title: "Data Visualization with R Part 2"
+author: "Adiva Shabana, edited by Yurham Afif"
+date: "5/17/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Leaflet for Spacial Data Visualisation
+
+In this chapter we want to show different US College by three different sector label: `Private`, `Public`, and `For-Profit` as a spacial data shown in interactive map.
+
+## LEAFLET
+
+Assign the dependence library `leaflet` and `tidyverse`
+
+```{r}
+library(leaflet)
+library(tidyverse)
+```
+
+## DATASET
+
+Open the dataset form a csv file `ipeds.csv` and see the first six data in the table
+
+```{r}
+ipeds <- read.csv('ipeds.csv')
+head(ipeds)
+```
+
+## DATA CLEANSING
+
+Remove colleges with missing sector information
+
+```{r}
+ipeds <- 
+    ipeds %>% 
+    drop_na()
+```
+
+## FILTER DATA
+
+As we want to see separated college data based on its sector label, assign the filter `ipeds_for_profit`, `ipeds_public`, and `ipeds_private` for each label
+
+```{r}
+ipeds_for_profit <- ipeds %>%
+        filter(sector_label == "For-Profit")
+ipeds_public <- ipeds %>%
+        filter(sector_label == "Public")
+ipeds_private <- ipeds %>%
+        filter(sector_label == "Private")
+```
+
+## VISUALISE EACH SECTOR
+
+Assuming "lng" and "lat" column as longitude and latitude, respectively, plot each data on the map
+
+```{r}
+leaflet()  %>% 
+    addProviderTiles("CartoDB")  %>% 
+    addMarkers(lng = ipeds_for_profit$lng, lat = ipeds_for_profit$lat) %>%
+    clearMarkers() %>%
+    addCircleMarkers(lng = ipeds_for_profit$lng, lat = ipeds_for_profit$lat, radius = 2, color = "red")
+```
+the clickable maps showing name as popup box given below for label `ipeds_public`
+
+```{r}
+leaflet()  %>% 
+    addProviderTiles("CartoDB")  %>% 
+    addCircleMarkers(data = ipeds_public, radius = 2, popup = ~name, color = "blue")
+```
+
+Maps for label `ipeds_private`
+
+```{r}
+leaflet()  %>% 
+    addProviderTiles("CartoDB")  %>% 
+    addCircleMarkers(data = ipeds_private, radius = 2, popup = ~name, color = "green")
+```

@@ -1,0 +1,35 @@
+---
+title: "Data Cleansing"
+author: "Calvin Sibarani, edited by Yurham Afif"
+date: "5/9/2021"
+output: github_document
+---
+
+```{r}
+# Load the necessary packages
+library(readr)
+```
+
+```{r}
+# Import CSV for prices
+(airbnb_price <- read_csv('airbnb_price.csv'))
+```
+
+```{r}
+# What is the average price of total listings?
+
+# identify the column data type
+library(tidyverse)
+glimpse(airbnb_price)
+is.numeric(airbnb_price$price)
+
+# create a new column which price are in numeric
+airbnb_price <- airbnb_price %>% 
+  mutate(price_dollars = as.numeric(str_remove(airbnb_price$price, " dollars")))
+airbnb_price
+
+# the average price of total listings? 
+mean(airbnb_price$price_dollars)
+
+```
+

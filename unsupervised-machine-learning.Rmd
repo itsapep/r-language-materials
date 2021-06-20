@@ -1,0 +1,112 @@
+---
+title: 'Machine Learning: Unsupervised Learning with R'
+author: "Adiva Shabana, edited by Yurham Afif"
+date: "6/13/2021"
+output: github_document
+---
+
+# K-means Clustering
+Analysis by Yurham Afif
+
+K-means Clustering is an algorithm that groups/cluster data according to the wanted configuration, represented by a centroid which correspond to the mean of points assigned to the clusters.
+
+In this case, we will use dataset `customer_movie_rating.csv` to create a customer segmentation using K-means clustering and determine the best k value.
+
+## Library
+
+Assign the dependence library `tidyverse`, `gridExtra` and `tidyverse`
+
+```{r}
+library(tidyverse)  # data manipulation and visualization
+library(gridExtra)  # plot arrangement
+library(factoextra) # clustering algorithm and visualisation
+```
+
+## Read data
+
+This is the code chunk to load `customer_movie_rating.csv`
+
+```{r}
+movie_rating <- read_csv('customer_movie_rating.csv')
+head(movie_rating)
+```
+
+## Data Preparation
+
+check any missing values and standardise the data
+
+```{r}
+movie_rating %>% is.na() %>% sum()
+rating <- movie_rating %>% scale()
+head(rating)
+```
+
+```{r}
+distance <- get_dist(rating)
+fviz_dist(distance)
+```
+
+
+## Computing K-Means
+
+Set the centroid = 2 as we want to group the data into 2 clusters.
+
+```{r}
+k2 <- kmeans(rating, centers = 2, nstart = 25)
+str(k2)
+fviz_cluster(k2, data = rating)
+```
+
+What does theis 2 clusters tells us about? Let's try to figure it out by visualise cluster result for each features.
+
+```{r}
+rating %>%
+  as_tibble() %>%
+  mutate(cluster = k2$cluster, # add clustered data into tibble `rating`
+        customer = 1:291 ) %>%
+  ggplot(aes(Horror, Romcom, color = factor(cluster), label = customer)) +
+  geom_text()
+```
+
+Cluster 2 rates romance higher than horror, compared to cluster 1 that rates horror higher than romance 
+
+```{r}
+rating %>%
+  as_tibble() %>%
+  mutate(cluster = k2$cluster, # add clustered data into tibble `rating`
+        customer = 1:291 ) %>%
+  ggplot(aes(Fantasy, Romcom, color = factor(cluster), label = customer)) +
+  geom_text()
+```
+
+cluster 1 rates romance and fantasy lower than cluster 2 do
+
+
+## Determining Optimal Clusters
+
+there are three optimal cluster number determination method, i.e. `Elbow Method`, `Average Silhouette Method`, and `Gap Statistics Method`. In this case, we will use `Elbow Method`. The idea is to choose the number which has the most significant difference for the data and not over differentiate it.
+
+```{r}
+set.seed(123)
+fviz_nbclust(rating, kmeans, method = "wss")
+#fviz_nbclust(rating, kmeans, method = "silhouette")
+```
+
+From the graph above, we choose k = 3 as our number of clusters
+
+```{r}
+set.seed(123)
+final <- kmeans(rating, 3, nstart = 25)
+print(final)
+
+
+movie_rating %>%
+  mutate(Cluster = final$cluster) %>%
+  group_by(Cluster) %>%
+  summarise_all("mean")
+```
+Interpretation:
+- Cluster 1 : cluster that gives `horror` low rate
+- Cluster 3 : Cluster that gives `romcom` and `fantacy` low rate
+- Cluster 2 : Cluster that gives `horror` and `action` high rate
+

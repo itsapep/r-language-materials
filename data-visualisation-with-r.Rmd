@@ -1,0 +1,97 @@
+---
+title: "Data Visualization with R"
+author: "Yurham Afif"
+date: "5/24/2021"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Load Packages
+
+This is the code chunk to load `tidyverse`
+
+```{r}
+library(tidyverse)
+```
+
+## Read data
+
+This is the code chunk to load `Insurance_Loss (1).csv`
+
+```{r}
+insurance <- read.csv('Insurance_Loss (1).csv')
+```
+
+## summarise the data
+
+see the data overview
+
+```{r}
+insurance %>% 
+  summary()
+insurance %>% 
+  glimpse()
+```
+
+## check missing data
+
+sum of total NA data
+```{r}
+insurance %>% 
+  is.na() %>% 
+  sum()
+```
+
+## ggplot geom_point geom_smooth `Age` x `Years.of.Driving.Experience`
+
+this graph shows an almost linear relation between `Age` and `Years.of.Driving.Experience`. The higher age, the higher driving experience.
+
+```{r}
+ggplot(data = insurance, aes(x = Age, y = Years.of.Driving.Experience, colour = Gender)) + 
+  geom_point() +
+  geom_smooth()
+```
+
+## ggplot geom_point `Years.of.Driving.Experience` x `Losses` with `Gender` factor
+
+The less driving experience, the higher losses they got, and visually dominated by male driver.
+
+```{r}
+ggplot(data = insurance, aes(x = Years.of.Driving.Experience, y = Losses)) +
+  geom_point(aes(colour = Gender))
+```
+
+## ggplot geom_point `Years.of.Driving.Experience` x `Losses` with `Married` factor
+
+Single driver make lots of losses despite of their driving experience.
+
+```{r}
+ggplot(data = insurance, aes(x = Years.of.Driving.Experience, y = Losses)) +
+  geom_point(aes(colour = Married))
+```
+
+## ggplot geom_col `Fuel.Type` x `Losses`
+
+the fuel type `D` has higher losses compared to type `P`
+
+
+```{r}
+ggplot(data = insurance, aes(x = Fuel.Type, y = Losses, colour = Fuel.Type)) +
+  geom_col()
+```
+
+
+## ggplot geom_boxplot `Gender` x `Age`
+
+this graph implies that both 'Female' and 'male' have the same distribution number of owned vehicles with median 2
+
+```{r}
+ggplot(data = insurance, aes(x = Gender, y = Age)) + 
+  geom_boxplot(aes(colour = Gender))
+
+```
+
+

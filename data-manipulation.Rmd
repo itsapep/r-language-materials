@@ -1,0 +1,52 @@
+---
+title: "Data Manipulation"
+author: "Calvin Sibarani, edited by Yurham Afif"
+date: "4/20/2021"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Data Manipulation Homework
+
+Stack Overflow dataset -- Solved by Afif
+
+Goal 1 : Hitung berapa banyak tiap question_id muncul pada dataset `answers.csv`. Join hasil tersebut ke kolom dataset `questions.csv`
+
+```{r}
+library(tidyverse)
+
+answer <- read_csv("answers.csv")
+question <- read_csv("questions.csv")
+answer
+
+question <- answer %>% 
+  count(question_id) %>% 
+  inner_join(question, by = c("question_id" = "id"))
+question
+
+```
+
+
+Goal 2 : Dari hasil nomor 1, join ke dataset `questions_tags.csv` dan ke dataset `tags.csv`
+
+```{r}
+questions_tags <- read_csv("question_tags.csv")
+tags <- read_csv("tags.csv")
+
+tags <- question %>% 
+  inner_join(questions_tags, by = "question_id") %>% 
+  inner_join(tags, by = c("tag_id" = "id"))
+tags
+```
+
+
+Goal 3 : Dari hasil nomor 2, agregasi berdasarkan kolom `tag_name` untuk mendapatkan berapa kali pertanyaan muncul. Urutkan hasil akhir dari `tag_name` yang paling sering muncul.
+
+```{r}
+tags %>% 
+  count(tag_name, sort = TRUE)
+```
+
